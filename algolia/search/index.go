@@ -3,6 +3,7 @@ package search
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/call"
 	"github.com/algolia/algoliasearch-client-go/v3/algolia/errs"
@@ -13,25 +14,37 @@ import (
 // Index provides methods to interact with the Algolia Search API on a single
 // index.
 type Index struct {
-	appID        string
-	name         string
-	maxBatchSize int
-	client       *Client
-	transport    *transport.Transport
+	appID                        string
+	name                         string
+	maxBatchSize                 int
+	client                       *Client
+	transport                    *transport.Transport
+	enableURLEncodingOfIndexName bool
 }
 
-func newIndex(client *Client, name string) *Index {
+func newIndex(
+	client *Client,
+	name string,
+	enableURLEncodingOfIndexName bool,
+) *Index {
 	return &Index{
-		appID:        client.appID,
-		client:       client,
-		name:         name,
-		maxBatchSize: client.maxBatchSize,
-		transport:    client.transport,
+		appID:                        client.appID,
+		client:                       client,
+		name:                         name,
+		maxBatchSize:                 client.maxBatchSize,
+		transport:                    client.transport,
+		enableURLEncodingOfIndexName: enableURLEncodingOfIndexName,
 	}
 }
 
 func (i *Index) path(format string, a ...interface{}) string {
-	prefix := fmt.Sprintf("/1/indexes/%s", i.name)
+	var urlIndexName string
+	if i.enableURLEncodingOfIndexName {
+		urlIndexName = url.QueryEscape(i.name)
+	} else {
+		urlIndexName = i.name
+	}
+	prefix := fmt.Sprintf("/1/indexes/%s", urlIndexName)
 	suffix := fmt.Sprintf(format, a...)
 	return prefix + suffix
 }

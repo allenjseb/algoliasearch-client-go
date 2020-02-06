@@ -20,9 +20,10 @@ const (
 // Client provides methods to interact with the Algolia Search API on multiple
 // indices which belong to the same Algolia application.
 type Client struct {
-	appID        string
-	maxBatchSize int
-	transport    *transport.Transport
+	appID                        string
+	maxBatchSize                 int
+	transport                    *transport.Transport
+	enableURLEncodingOfIndexName bool
 }
 
 // NewClient instantiates a new client able to interact with the Algolia
@@ -74,13 +75,14 @@ func NewClientWithConfig(config Configuration) *Client {
 			config.ExtraUserAgent,
 			config.Compression,
 		),
+		enableURLEncodingOfIndexName: config.CompatibilityBreakingFeatures.EnableURLEncodingOfIndexName,
 	}
 }
 
 // InitIndex instantiates a new index able to interact with the Algolia
 // Search API on a single index.
 func (c *Client) InitIndex(indexName string) *Index {
-	return newIndex(c, indexName)
+	return newIndex(c, indexName, c.enableURLEncodingOfIndexName)
 }
 
 func (c *Client) path(format string, a ...interface{}) string {
