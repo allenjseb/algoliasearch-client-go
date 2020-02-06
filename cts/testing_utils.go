@@ -23,12 +23,16 @@ import (
 
 func InitSearchClient1AndIndex(t *testing.T) (*search.Client, *search.Index, string) {
 	c := InitSearchClient1(t)
-	canonicalName := GenerateCanonicalPrefixName()
-	indexName := canonicalName + "_" + t.Name()
-	indexName = strings.Replace(indexName, "/", "_", -1)
-	indexName = strings.Replace(indexName, " ", "_", -1)
+	indexName := GenerateIndexName(t)
 	i := c.InitIndex(indexName)
 	return c, i, indexName
+}
+
+func GenerateIndexName(t *testing.T) string {
+	indexName := GenerateCanonicalPrefixName() + "_" + t.Name()
+	indexName = strings.Replace(indexName, "/", "_", -1)
+	indexName = strings.Replace(indexName, " ", "_", -1)
+	return indexName
 }
 
 func InitSearchClient1(t *testing.T) *search.Client {
